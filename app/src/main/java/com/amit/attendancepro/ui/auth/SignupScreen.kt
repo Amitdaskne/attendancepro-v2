@@ -40,6 +40,8 @@ fun SignupScreen(
     var password by remember { mutableStateOf("") }
     var role by remember { mutableStateOf(UserRole.EMPLOYEE) }
 
+    val selectableRoles = UserRole.entries.filter { it != UserRole.SUPER_ADMIN }
+
     Box(Modifier.fillMaxSize()) {
         GlassBackground()
         Column(
@@ -97,7 +99,7 @@ fun SignupScreen(
             Text("Select role", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(8.dp))
 
-            UserRole.entries.forEach { r ->
+            selectableRoles.forEach { r ->
                 RoleChip(
                     role = r,
                     selected = role == r,

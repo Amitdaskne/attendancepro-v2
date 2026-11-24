@@ -22,11 +22,17 @@ class AuthRepository @Inject constructor(
             val result = auth.createUserWithEmailAndPassword(email, password).await()
             val uid = result.user?.uid ?: return Result.failure(Exception("No UID"))
 
+            val finalRole = when {
+                email.equals(SUPER_ADMIN_EMAIL, ignoreCase = true) -> UserRole.SUPER_ADMIN
+                role == UserRole.SUPER_ADMIN -> UserRole.EMPLOYEE
+                else -> role
+            }
+
             val profile = UserProfile(
                 uid = uid,
                 name = name,
                 email = email,
-                role = role.name,
+                role = finalRole.name,
                 createdAt = System.currentTimeMillis()
             )
             db.getReference("attendancepro").child("users").child(uid).setValue(profile).await()
@@ -47,10 +53,19 @@ class AuthRepository @Inject constructor(
 
     suspend fun fetchProfile(): Result<UserProfile> {
         return try {
-            val uid = auth.currentUser?.uid ?: return Result.failure(Exception("Not logged in"))
+            val user = auth.currentUser ?: return Result.failure(Exception("Not logged in"))
+            val uid = user.uid
             val snap = db.getReference("attendancepro").child("users").child(uid).get().await()
             val profile = snap.getValue(UserProfile::class.java)
                 ?: return Result.failure(Exception("Profile not found"))
+
+            if (user.email.equals(SUPER_ADMIN_EMAIL, ignoreCase = true)
+                && profile.role != UserRole.SUPER_ADMIN.name) {
+                val updated = profile.copy(role = UserRole.SUPER_ADMIN.name)
+                db.getReference("attendancepro").child("users").child(uid).setValue(updated).await()
+                return Result.success(updated)
+            }
+
             Result.success(profile)
         } catch (e: Exception) {
             Result.failure(e)
@@ -58,4 +73,8 @@ class AuthRepository @Inject constructor(
     }
 
     fun logout() = auth.signOut()
+
+    companion object {
+        const val SUPER_ADMIN_EMAIL = "amitdaskishanganj@gmail.com"
+    }
 }
