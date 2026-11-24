@@ -1,18 +1,26 @@
 package com.amit.attendancepro.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.amit.attendancepro.domain.model.UserRole
-import com.amit.attendancepro.ui.screens.RoleSelectionScreen
+import com.amit.attendancepro.ui.auth.AuthState
+import com.amit.attendancepro.ui.auth.AuthViewModel
+import com.amit.attendancepro.ui.auth.LoginScreen
+import com.amit.attendancepro.ui.auth.SignupScreen
 import com.amit.attendancepro.ui.screens.employee.EmployeeDashboard
 import com.amit.attendancepro.ui.screens.manager.ManagerDashboard
 import com.amit.attendancepro.ui.screens.storeadmin.StoreAdminDashboard
 import com.amit.attendancepro.ui.screens.superadmin.SuperAdminDashboard
 
 object Routes {
-    const val ROLE_SELECTION = "role_selection"
+    const val LOGIN = "login"
+    const val SIGNUP = "signup"
     const val EMPLOYEE = "employee"
     const val MANAGER = "manager"
     const val STORE_ADMIN = "store_admin"
@@ -20,34 +28,53 @@ object Routes {
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(vm: AuthViewModel = hiltViewModel()) {
     val navController = rememberNavController()
+    val state by vm.state.collectAsState()
 
-    NavHost(navController, startDestination = Routes.ROLE_SELECTION) {
-        composable(Routes.ROLE_SELECTION) {
-            RoleSelectionScreen(
-                onRoleSelected = { role ->
-                    val route = when (role) {
-                        UserRole.EMPLOYEE -> Routes.EMPLOYEE
-                        UserRole.MANAGER -> Routes.MANAGER
-                        UserRole.STORE_ADMIN -> Routes.STORE_ADMIN
-                        UserRole.SUPER_ADMIN -> Routes.SUPER_ADMIN
-                    }
-                    navController.navigate(route)
-                }
+    LaunchedEffect(Unit) { vm.checkAuth() }
+
+    LaunchedEffect(state) {
+        if (state is AuthState.Authenticated) {
+            val role = (state as AuthState.Authenticated).profile.role
+            val route = when (UserRole.valueOf(role)) {
+                UserRole.EMPLOYEE -> Routes.EMPLOYEE
+                UserRole.MANAGER -> Routes.MANAGER
+                UserRole.STORE_ADMIN -> Routes.STORE_ADMIN
+                UserRole.SUPER_ADMIN -> Routes.SUPER_ADMIN
+            }
+            if (navController.currentDestination?.route != route) {
+                navController.navigate(route) { popUpTo(0) }
+            }
+        }
+    }
+
+    NavHost(navController, startDestination = Routes.LOGIN) {
+        composable(Routes.LOGIN) {
+            LoginScreen(
+                state = state,
+                onLogin = { e, p -> vm.login(e, p) },
+                onGoToSignup = { vm.clearError(); navController.navigate(Routes.SIGNUP) }
+            )
+        }
+        composable(Routes.SIGNUP) {
+            SignupScreen(
+                state = state,
+                onSignup = { n, e, p, r -> vm.signup(n, e, p, r) },
+                onGoToLogin = { vm.clearError(); navController.popBackStack() }
             )
         }
         composable(Routes.EMPLOYEE) {
-            EmployeeDashboard(onBack = { navController.popBackStack() })
+            EmployeeDashboard(onBack = { vm.logout(); navController.navigate(Routes.LOGIN) { popUpTo(0) } })
         }
         composable(Routes.MANAGER) {
-            ManagerDashboard(onBack = { navController.popBackStack() })
+            ManagerDashboard(onBack = { vm.logout(); navController.navigate(Routes.LOGIN) { popUpTo(0) } })
         }
         composable(Routes.STORE_ADMIN) {
-            StoreAdminDashboard(onBack = { navController.popBackStack() })
+            StoreAdminDashboard(onBack = { vm.logout(); navController.navigate(Routes.LOGIN) { popUpTo(0) } })
         }
         composable(Routes.SUPER_ADMIN) {
-            SuperAdminDashboard(onBack = { navController.popBackStack() })
+            SuperAdminDashboard(onBack = { vm.logout(); navController.navigate(Routes.LOGIN) { popUpTo(0) } })
         }
     }
 }

@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "1033455440282",
+    "firebase_url": "https://chat2-6bd92-default-rtdb.firebaseio.com",
+    "project_id": "chat2-6bd92",
+    "storage_bucket": "chat2-6bd92.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033455440282:android:91bc9b58efca8f0d902a23",
+        "android_client_info": {
+          "package_name": "com.aistudio.helper.vkmxqr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDw41V8n4im7-RmCrgJPmJbCx_TDsp0VY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033455440282:android:2e41823d8c30c0bf902a23",
+        "android_client_info": {
+          "package_name": "com.amit.attendancepro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDw41V8n4im7-RmCrgJPmJbCx_TDsp0VY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033455440282:android:fa90bb9b850ffa21902a23",
+        "android_client_info": {
+          "package_name": "com.amit.chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDw41V8n4im7-RmCrgJPmJbCx_TDsp0VY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
