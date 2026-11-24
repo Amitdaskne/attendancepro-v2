@@ -17,8 +17,8 @@ class AuthRepository @Inject constructor(
     val currentUser get() = auth.currentUser
     val isLoggedIn get() = auth.currentUser != null
 
-    suspend fun signUp(name: String, email: String, password: String, role: UserRole): Result<Unit> =
-        try {
+    suspend fun signUp(name: String, email: String, password: String, role: UserRole): Result<Unit> {
+        return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
             val uid = result.user?.uid ?: return Result.failure(Exception("No UID"))
 
@@ -34,17 +34,19 @@ class AuthRepository @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
 
-    suspend fun login(email: String, password: String): Result<Unit> =
-        try {
+    suspend fun login(email: String, password: String): Result<Unit> {
+        return try {
             auth.signInWithEmailAndPassword(email, password).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
 
-    suspend fun fetchProfile(): Result<UserProfile> =
-        try {
+    suspend fun fetchProfile(): Result<UserProfile> {
+        return try {
             val uid = auth.currentUser?.uid ?: return Result.failure(Exception("Not logged in"))
             val snap = db.getReference("attendancepro").child("users").child(uid).get().await()
             val profile = snap.getValue(UserProfile::class.java)
@@ -53,6 +55,7 @@ class AuthRepository @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
 
     fun logout() = auth.signOut()
 }
